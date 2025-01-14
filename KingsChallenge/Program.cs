@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 Console.WriteLine("Hello, Kings Challenge project!");
-var kings = new List<King>();
 string url = "https://gist.githubusercontent.com/christianpanton/10d65ccef9f29de3acd49d97ed423736/raw/b09563bc0c4b318132c7a738e679d4f984ef0048/kings"; // Replace with your URL
 using HttpClient client = new();
 try
@@ -16,23 +16,13 @@ try
     string responseData = await response.Content.ReadAsStringAsync();
     Console.WriteLine("Data fetched successfully!");
 
-    // Parse JSON and handle array root
-    using JsonDocument jsonDocument = JsonDocument.Parse(responseData);
-    var root = jsonDocument.RootElement;
+    // Deserialize the JSON array into a List of MyItem objects
+    var kings = JsonSerializer.Deserialize<List<King>>(responseData);
 
-    if (root.ValueKind == JsonValueKind.Array)
+    // Iterate over the list and process each item
+    foreach (var king in kings)
     {
-        Console.WriteLine("Root element is an array. Iterating over elements:");
-
-        foreach (var item in root.EnumerateArray())
-        {
-            Console.WriteLine(item.ToString());
-        }
-    }
-    else
-    {
-        Console.WriteLine("Root element is not an array:");
-        Console.WriteLine(root.ToString());
+        Console.WriteLine($"Id: {king.Id}, Name: {king.Name}, Country: {king.Country}, House: {king.House}, Years: {king.Years}");
     }
 }
 catch (Exception ex)
@@ -42,9 +32,14 @@ catch (Exception ex)
 
 public class King
 {
+    [JsonPropertyName("id")]
     public int Id { get; set; }
+    [JsonPropertyName("nm")]
     public string Name { get; set; }
+    [JsonPropertyName("cty")]
     public string Country { get; set; }
+    [JsonPropertyName("hse")]
     public string House { get; set; }
+    [JsonPropertyName("yrs")]
     public string Years { get; set; }
 }
